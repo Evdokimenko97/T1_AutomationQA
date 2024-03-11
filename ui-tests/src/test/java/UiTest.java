@@ -1,6 +1,7 @@
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-public class UiTests {
+public class UiTest {
     @Test
     public void test() {
         System.out.println("UI тест запущен!");

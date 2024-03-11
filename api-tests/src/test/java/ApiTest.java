@@ -1,4 +1,7 @@
-public class ApiTests {
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+public class ApiTest {
     @Test
     public void testAPI() {
         System.out.println("API тест запущен!");
