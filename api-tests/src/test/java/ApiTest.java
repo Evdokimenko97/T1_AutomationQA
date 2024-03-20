@@ -1,61 +1,60 @@
-import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import pojo.Cart;
 import pojo.Product;
 import pojo.Register;
+import util.Token;
 
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ApiTest {
-    @BeforeAll
-    public static void beforeAll() {
-        RestAssured.baseURI = "http://9b142cdd34e.vps.myjino.ru:49268";
-        RestAssured.filters(RequestLoggingFilter.logRequestTo(System.out), ResponseLoggingFilter.logResponseTo(System.out));
-    }
+public class ApiTest extends BaseApiTest {
+    public static final String REGISTER_ENDPOINT = "/register";
+    public static final String LOGIN_ENDPOINT = "/login";
+    public static final String PRODUCTS_ENDPOINT = "/products";
+    public static final String CART_ENDPOINT = "/cart";
+
+    Register auth = new Register("drusss123", "vilezzz");
 
     @Test
     public void postRegister() {
-        Register register = new Register("drusss123", "vilezzz");
-
-        int statusCode = given()
-                .contentType(ContentType.JSON)
-                .body(register)
-                .when()
-                .post("/register").getStatusCode();
-
-        assertEquals(201, statusCode, "Ошибка post /register!");
-    }
-
-    @Test
-    public void postLogin() {
-        Register auth = new Register("drus123", "vilezzz");
 
         int statusCode = given()
                 .contentType(ContentType.JSON)
                 .body(auth)
                 .when()
-                .post("/login")
+                .post(REGISTER_ENDPOINT)
                 .getStatusCode();
 
-        assertEquals(200, statusCode, "Ошибка post /login!");
+        assertEquals(201, statusCode, "Ошибка post " + REGISTER_ENDPOINT + "!");
+    }
+
+    @Test
+    public void postLogin() {
+
+        int statusCode = given()
+                .contentType(ContentType.JSON)
+                .body(auth)
+                .when()
+                .post(LOGIN_ENDPOINT)
+                .getStatusCode();
+
+        assertEquals(200, statusCode, "Ошибка post " + LOGIN_ENDPOINT + "!");
     }
 
     @Test
     public void getProducts() {
 
-        int statusCode = given().get("/products").getStatusCode();
-
-        assertEquals(200, statusCode, "Ошибка get /products!");
+        given()
+                .get(PRODUCTS_ENDPOINT)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .assertThat().body(matchesJsonSchemaInClasspath("product_schema.json"));
     }
 
     @Test
@@ -70,9 +69,10 @@ public class ApiTest {
                 .contentType(ContentType.JSON)
                 .body(product)
                 .when()
-                .post("/products").getStatusCode();
+                .post(PRODUCTS_ENDPOINT)
+                .getStatusCode();
 
-        assertEquals(201, statusCode, "Ошибка post /products!");
+        assertEquals(201, statusCode, "Ошибка post " + PRODUCTS_ENDPOINT + "!");
     }
 
     @Test
@@ -80,13 +80,15 @@ public class ApiTest {
 
         List<Product> products = given()
                 .when()
-                .get("/products")
+                .get(PRODUCTS_ENDPOINT)
                 .then().statusCode(200)
+                .contentType(ContentType.JSON)
+                .assertThat().body(matchesJsonSchemaInClasspath("product_schema.json"))
                 .extract().body().jsonPath().getList("", Product.class);
 
         // Проверка, что есть id в списке
         int expectedId = 1;
-        assertTrue(products.stream().anyMatch(product -> product.getId() == expectedId), "Не найден в списке id = " + expectedId);
+        assertTrue(products.stream().anyMatch(product -> product.getId() == expectedId), "Не найден в списке get " + PRODUCTS_ENDPOINT + " id = " + expectedId);
     }
 
     @Test
@@ -100,80 +102,135 @@ public class ApiTest {
         int productIdToUpdate = 1;
         int statusCode = given()
                 .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
                 .body(product)
                 .when()
-                .put("/products/" + productIdToUpdate).getStatusCode();
+                .put(PRODUCTS_ENDPOINT + "/" + productIdToUpdate)
+                .getStatusCode();
 
-        assertEquals(200, statusCode, "Ошибка put /products/" + productIdToUpdate + "!");
+        assertEquals(200, statusCode, "Ошибка put " + PRODUCTS_ENDPOINT + "/" + productIdToUpdate + "!");
     }
+
+    @Test
+    public void putProductNegativeId() {
+        int productIdToUpdate = 10000100;
+
+        Response response = given()
+                .contentType(ContentType.JSON)
+                .body("")
+                .when()
+                .put(PRODUCTS_ENDPOINT + "/" + productIdToUpdate);
+
+        assertEquals(404, response.getStatusCode(), "Ошибка! Обновление put " + PRODUCTS_ENDPOINT + "/" + productIdToUpdate + " произошло!");
+        assertTrue(response.getBody().asString().contains("Product not found"));
+    }
+
 
     @Test
     public void deleteProduct() {
         int productIdToDelete = 1;
 
-        int statusCode = given()
+        Response response = given()
+                .contentType(ContentType.JSON)
                 .when()
-                .delete("/products/" + productIdToDelete)
-                .getStatusCode();
+                .delete(PRODUCTS_ENDPOINT + "/" + productIdToDelete);
 
-        assertEquals(200, statusCode, "Ошибка delete /products/" + productIdToDelete + "!");
+        assertEquals(200, response.getStatusCode(), "Ошибка delete " + PRODUCTS_ENDPOINT + "/" + productIdToDelete + "!");
+
+        int badStatusCode = response.getStatusCode();
+
+        assertEquals(404, badStatusCode, "При повторном удалении статус код не 404");
+        assertTrue("Product not found" .contains(response.getBody().asString()), "Ошибка! Не найдено сообщение 'Product not found'");
     }
 
     @Test
-    public void getCartWithToken() {
-        String token = getToken("drusss123", "vilezzz");
+    public void getCart() {
+        String token = Token.getToken(LOGIN_ENDPOINT, "drusss123", "vilezzz");
 
-        int statusCode = given()
+        given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/cart").statusCode();
-
-        assertEquals(200, statusCode, "Ошибка get /cart!");
+                .get(CART_ENDPOINT)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .assertThat().body(matchesJsonSchemaInClasspath("cart_schema.json"));
     }
 
     @Test
-    public void postCartWithToken() {
-        String token = getToken("drusss123","vilezzz");
+    public void postCart() {
+        String token = Token.getToken(LOGIN_ENDPOINT, "drusss123", "vilezzz");
 
         Cart cart = new Cart();
         cart.setProduct_id(1);
         cart.setQuantity(2);
 
-        int statusCode = given()
+        Response response = given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
                 .body(cart)
                 .when()
-                .post("/cart").getStatusCode();
+                .post(CART_ENDPOINT);
 
-        assertEquals(201, statusCode, "Ошибка post /cart!");
+        assertEquals(201, response.getStatusCode(), "При добавлении продукта в корзину произошла ошибка!");
+        assertTrue(response.getBody().asString().contains("Product added to cart successfully"));
     }
 
     @Test
-    public void deleteCartWithToken() {
-        String token = getToken("drusss123","vilezzz");
-
-        int productIdToDelete = 1;
+    public void postCartWithoutProductId() {
+        String token = Token.getToken(LOGIN_ENDPOINT, "drusss123", "vilezzz");
 
         int statusCode = given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
+                .body("{ \"quantity\": 2 }")
                 .when()
-                .delete("/cart/" + productIdToDelete)
+                .post(CART_ENDPOINT)
                 .getStatusCode();
 
-        assertEquals(200, statusCode, "Ошибка delete /cart/" + productIdToDelete + "!");
+        assertEquals(400, statusCode, "Ошибка post " + CART_ENDPOINT + " отсутствует product_id!");
     }
 
+    @Test
+    public void postCartWithoutToken() {
 
-    public String getToken(String username, String password) {
+        int statusCode = given()
+                .contentType(ContentType.JSON)
+                .body("")
+                .when()
+                .post(CART_ENDPOINT)
+                .getStatusCode();
+
+        assertEquals(401, statusCode, "Ошибка post " + CART_ENDPOINT + " без токена!");
+    }
+
+    @Test
+    public void deleteCart() {
+        String token = Token.getToken(LOGIN_ENDPOINT, "drusss123", "vilezzz");
+
+        int productIdToDelete = 1;
+
         Response response = given()
                 .contentType(ContentType.JSON)
-                .body(new Register(username, password))
+                .header("Authorization", "Bearer " + token)
                 .when()
-                .post("/login");
+                .delete(CART_ENDPOINT + "/" + productIdToDelete);
 
-        String jsonString = response.getBody().asString();
-        return JsonPath.from(jsonString).get("access_token");
+        assertEquals(200, response.getStatusCode(), "Ошибка delete " + PRODUCTS_ENDPOINT + "/" + productIdToDelete + "!");
+    }
+
+    @Test
+    public void deleteCartNegative() {
+        String token = Token.getToken(LOGIN_ENDPOINT, "drusss123", "vilezzz");
+
+        int productIdToDelete = 1;
+        Response negativeResponse = given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete(CART_ENDPOINT + "/" + productIdToDelete);
+
+        assertEquals(404, negativeResponse.getStatusCode(), "При повторном удалении статус код не 404");
+        assertTrue(negativeResponse.getBody().asString().contains("Product not found"));
     }
 }

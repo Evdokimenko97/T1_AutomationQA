@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "cart": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "price": { "type": "number" },
+          "discount": { "type": "number" }
+        },
+        "required": ["id", "name", "category", "price", "discount"]
+      }
+    },
+    "total_price": { "type": "number" },
+    "total_discount": { "type": "number" }
+  },
+  "required": ["cart", "total_price", "total_discount"]
+}
