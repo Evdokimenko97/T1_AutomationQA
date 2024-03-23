@@ -137,10 +137,15 @@ public class ApiTest extends BaseApiTest {
 
         assertEquals(200, response.getStatusCode(), "Ошибка delete " + PRODUCTS_ENDPOINT + "/" + productIdToDelete + "!");
 
-        int badStatusCode = response.getStatusCode();
+        Response negativeResponse = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .delete(PRODUCTS_ENDPOINT + "/" + productIdToDelete);
+
+        int badStatusCode = negativeResponse.getStatusCode();
 
         assertEquals(404, badStatusCode, "При повторном удалении статус код не 404");
-        assertTrue("Product not found" .contains(response.getBody().asString()), "Ошибка! Не найдено сообщение 'Product not found'");
+        assertTrue("Product not found" .contains(negativeResponse.getBody().asString()), "Ошибка! Не найдено сообщение 'Product not found'");
     }
 
     @Test
