@@ -12,7 +12,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ApiTest extends BaseApiTest {
+public class TestAPI extends BaseApiTest {
     public static final String REGISTER_ENDPOINT = "/register";
     public static final String LOGIN_ENDPOINT = "/login";
     public static final String PRODUCTS_ENDPOINT = "/products";
