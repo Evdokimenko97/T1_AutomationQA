@@ -1,14 +1,17 @@
 package core;
 
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.ElementsCollection;
-import com.codeborne.selenide.Selenide;
-import exception.BaseException;
-import org.junit.jupiter.api.Test;
+import com.codeborne.selenide.*;
+import io.qameta.allure.Step;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 
 public class TestUI extends BaseTest {
@@ -22,10 +25,6 @@ public class TestUI extends BaseTest {
     private static final String addRemoveElementsPage = "//li/a[text()='Add/Remove Elements']";
     private static final String statusCodesPage = "//li/a[text()='Status Codes']";
 
-    // Checkboxes
-    private static final String checkboxFirst = "//form[@id='checkboxes']/input[1]";
-    private static final String checkboxSecond = "//form[@id='checkboxes']/input[2]";
-
     // Dropdowns
     private static final String dropdown = "//select[@id='dropdown']";
 
@@ -35,12 +34,7 @@ public class TestUI extends BaseTest {
 
     // Element
     private static final String notificationMsg = "//div[@class='flash notice']";
-    private static final String status200 = "//a[text()='200']";
-    private static final String status301 = "//a[text()='301']";
-    private static final String status404 = "//a[text()='404']";
-    private static final String status500 = "//a[text()='500']";
     private static final String messageContent = "//div[@id='content']//p";
-
 
 
     // Input fields
@@ -52,152 +46,195 @@ public class TestUI extends BaseTest {
     private static final String buttonElements = "//div[@id='elements']/button";
 
 
-    @Test
-    void test1() {
+    @ParameterizedTest(name = "Тест с выбором чек-бокса #{0}")
+    @ValueSource(ints = {1, 3})
+    void test1(int param) {
         // Открытие страницы 'Checkboxes'
         $x(checkboxesPage).click();
 
-        // Выбор первого и отключение второго чек-бокса
-        $x(checkboxFirst).click();
-        $x(checkboxSecond).click();
+        SelenideElement checkbox = $x("//form[@id='checkboxes']/input[" + param + "]");
+        clickElement(checkbox, "Чек-бокс " + param);
 
-        // Проверки
-        System.out.println($x(checkboxFirst).getAttribute("checked"));
-        System.out.println($x(checkboxSecond).getAttribute("checked"));
+        if (param == 1) {
+            verifyCheckbox(checkbox, "Чек-бокс " + param, true);
+        } else if (param == 2) {
+            verifyCheckbox(checkbox, "Чек-бокс " + param, false);
+        }
     }
 
     @Test
+    @DisplayName("Тест выбором комбо-бокса")
     void test2() {
         // Открытие страницы 'Dropdown'
         $x(dropdownPage).click();
 
-        // Выбор комбо-бокса и вывод текста
-        $x(dropdown).selectOption("Option 1");
-        System.out.println($x(dropdown).getText());
+        SelenideElement dropDown = $x(dropdown);
+        selectOption(dropDown, "Option 1");
+        verifySelectedOption("Option 1");
 
-        // Выбор комбо-бокса и вывод текста
-        $x(dropdown).selectOption("Option 2");
-        System.out.println($x(dropdown).getText());
+        selectOption(dropDown, "Option 2");
+        verifySelectedOption("Option 2");
     }
 
-    @Test
-    void test3() throws BaseException {
+    @RepeatedTest(value = 5, failureThreshold = 1, name = "Тест с отображением 5 элементов #{currentRepetition} из {totalRepetitions}")
+    void test3() {
         // Открытие страницы 'Dropdown'
         $x(disappearingElementsPage).click();
 
         // Проверка 5 элементов
-        ElementsCollection elements = null;
-        for (int i = 0; i < 10; i++) {
-            elements = $$x(disappearingElements);
-            if (elements.size() != 5) {
-                refresh();
-            } else {
-                break;
-            }
-        }
-
-        if (elements.size() != 5) {
-            throw new BaseException("Ошибка!");
-        }
+        ElementsCollection elements = $$x(disappearingElements);
+        elements.should(CollectionCondition.size(5));
     }
 
-    @Test
-    void test4() {
+    @TestFactory
+    @DisplayName("Тест с заполнением поля ввода")
+    List<DynamicTest> test4() {
+        List<DynamicTest> result = new ArrayList<>();
+
         // Открытие страницы 'Inputs'
         $x(inputsPage).click();
 
-        // Заполнение и проверка поля
-        $x(inputNumber).setValue("5555");
-        System.out.println($x(inputNumber).getValue());
+        // Позитивные тесты
+        List<String> testData = Arrays.asList("0", "123", "456", "789", "987", "654", "321", "1000", "999", "9999");
+        for (int i = 0; i < testData.size(); i++) {
+            String number = testData.get(i);
+            result.add(
+                    DynamicTest.dynamicTest("Позитивный тест #" + i + ": ввод числа " + number,
+                            () -> {
+                                inputField(inputNumber, number);
+                                $x(inputNumber).shouldHave(exactValue(number));
+                            })
+            );
+        }
+
+        // Негативные тесты
+        List<String> invalidInputs = Arrays.asList("abc", "!@#", " 123", "456 ");
+        for (int i = 0; i < invalidInputs.size(); i++) {
+            String invalidInput = invalidInputs.get(i);
+            result.add(
+                    DynamicTest.dynamicTest("Негативный тест #" + i + ": попытка ввода " + invalidInput,
+                            () -> {
+                                inputField(inputNumber, invalidInput);
+                                $x(inputNumber).shouldNotHave(exactValue(invalidInput));
+                            })
+            );
+        }
+
+        return result;
     }
 
-    @Test
-    void test5() {
+    // Ввод поля
+    private void inputField(String xpath, String value) {
+        $x(xpath).clear();
+        $x(xpath).sendKeys(value);
+    }
+
+    @ParameterizedTest(name = "Тест с наведением мыши на элемент")
+    @ValueSource(ints = {1, 2, 3})
+    void test5(int avatarNum) {
         // Открытие страницы 'Hovers'
         $x(hoversPage).click();
 
-        ElementsCollection avatarsCollection = $$x(avatars);
+        // Наведение мыши на элемент
+        String avatar = "(" + avatars + ")[" + avatarNum + "]";
+        $x(avatar).hover();
 
-        // Наводим курсор и выводим текст
-        for (int i = 1; i <= avatarsCollection.size(); i++) {
-            String avatar = "(" + avatars + ")[" + i + "]";
-
-            $x(avatar).hover();
-            System.out.println($x(avatar + "/parent::*/div[@class='figcaption']").getText());
-        }
+        // Проверка
+        String expectedText = "user" + avatarNum;
+        $x(avatar + "/parent::*/div[@class='figcaption']").shouldHave(text(expectedText));
     }
 
-    @Test
+    @RepeatedTest(value = 10, name = "Тест с проверкой сообщения #{currentRepetition} из {totalRepetitions}")
     void test6() {
         // Открытие страницы 'Notification Message'
         $x(notificationMessagesPage).click();
 
-        // Нажатие на кн. 'Click here'
+        // Нажатие на кн. 'Click here' и проверка
         $x(clickButton).click();
-
-        while (true) {
-            if (!$x(notificationMsg).getText().contains("Action successful")) {
-                // Закрытие уведомления
-                $x(notificationMsg + "/a[@class='close']").click();
-
-                // Повторное нажатие
-                $x(clickButton).click();
-                $x(notificationMsg).should(Condition.visible, Duration.ofSeconds(5));
-            } else {
-                break;
-            }
-        }
+        $x(notificationMsg).shouldHave(text("Action successful"));
     }
 
-    @Test
-    void test7() {
-        ElementsCollection elements;
+
+    @TestFactory
+    @DisplayName("Тест с добавлением и удалением элементов")
+    List<DynamicTest> test7() {
+        List<DynamicTest> result = new ArrayList<>();
 
         // Открытие страницы 'Add/Remove Elements'
         $x(addRemoveElementsPage).click();
 
-        // Нажатие на кн. 'Add Element'
-        for (int i = 0; i < 5; i++) {
-            $x(addElement).click();
-            elements = $$x(buttonElements);
 
-            // Вывод текста последнего элемента
-            System.out.println(elements.last().getText());
+        String[][] testData = {
+                {"2", "1"},
+                {"5", "2"},
+                {"1", "3"}
+        };
+
+        for (int i = 0; i < testData.length; i++) {
+            int addCount = Integer.parseInt(testData[i][0]);
+            int removeCount = Integer.parseInt(testData[i][1]);
+
+            result.add(
+                    DynamicTest.dynamicTest("Тест #" + i + ": добавляем и удаляем элемнты в пропорциях " + Arrays.toString(testData[i]),
+                            () -> {
+                                // Обновление браузера
+                                Selenide.refresh();
+
+                                // Добавление кнопки
+                                for (int j = 0; j < addCount; j++) {
+                                    $x(addElement).click();
+                                }
+
+                                // Удаляем первую кнопку из добавленных
+                                for (int z = 0; z < removeCount; z++) {
+                                    $x(buttonElements).click();
+                                }
+
+                                // Проверка количества элементов на странице
+                                $$x(buttonElements).should(CollectionCondition.size(addCount - removeCount));
+                            })
+            );
         }
 
-        // Нажатие на разные кнопки 'Delete' 3 раза
-        for (int i = 0 ; i < 3; i++) {
-            // Рандом от 1 до 5
-            Random random = new Random();
-            int randomNumber = random.nextInt(5) + 1;
-
-            // Нажатие на кн. 'Delete'
-            $x(buttonElements + "[" + randomNumber + "]").should(Condition.visible, Duration.ofSeconds(1)).click();
-        }
-
-        // Вывод количество элементов и текста
-        System.out.println($$x(buttonElements).size());
-        System.out.println($$x(buttonElements).texts());
+        return result;
     }
 
-    @Test
-    void test8() {
+    @ParameterizedTest(name = "Тест с проверкой статуса #{0}")
+    @ValueSource(strings = {"200", "301", "404", "500"})
+    void test8(String status) {
         // Открытие страницы 'Status Codes'
         $x(statusCodesPage).click();
 
-        // Вывод в консоль сообщения после нажатия на статус
-        System.out.println(messageStatus(status200));
-        System.out.println(messageStatus(status301));
-        System.out.println(messageStatus(status404));
-        System.out.println(messageStatus(status500));
+        // Проверка статус кода
+        verifyStatusCode("//a[text()='" + status + "']", "This page returned a " + status + " status code.");
     }
 
-    private String messageStatus(String xPath) {
-        // Нажимаем на кнопку со статусом
-        $x(xPath).click();
-        String msg = $x(messageContent).getText();
+    private void verifyStatusCode(String statusCode, String expectedMessage) {
+        $x(statusCode).click();
+        $x(messageContent).shouldHave(text(expectedMessage));
+        back();
+    }
 
-        Selenide.back();
-        return msg;
+    @Step("Нажать на элемент '{elementName}'")
+    private void clickElement(SelenideElement element, String elementName) {
+        element.should(visible, Duration.ofSeconds(2)).click();
+    }
+
+    @Step("Выбрать комбо-бокс '{comboBox}'")
+    private void selectOption(SelenideElement element, String comboBox) {
+        element.should(visible, Duration.ofSeconds(1)).selectOption(comboBox);
+    }
+
+    @Step("Проверить, что выбрана опция '{optionText}'")
+    private void verifySelectedOption(String optionText) {
+        $x("//option[text()='" + optionText + "']").should(attribute("selected", "true"));
+    }
+
+    @Step("Проверить, что выбран или нет чек-бокс '{checkbox}'")
+    private void verifyCheckbox(SelenideElement checkbox, String checkboxName, boolean isSelected) {
+        if (isSelected)
+            checkbox.should(checked);
+        else
+            checkbox.should(not(checked));
     }
 }
