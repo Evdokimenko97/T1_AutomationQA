@@ -47,7 +47,7 @@ public class TestUI extends BaseTest {
 
 
     @ParameterizedTest(name = "Тест с выбором чек-бокса #{0}")
-    @ValueSource(ints = {1, 3})
+    @ValueSource(ints = {1, 2})
     void test1(int param) {
         // Открытие страницы 'Checkboxes'
         $x(checkboxesPage).click();
