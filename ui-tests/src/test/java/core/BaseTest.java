@@ -9,7 +9,7 @@ import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import util.ConfigReader;
+import utils.ConfigReader;
 
 import java.time.Duration;
 
