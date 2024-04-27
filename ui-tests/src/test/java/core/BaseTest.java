@@ -50,9 +50,6 @@ abstract class BaseTest {
             }});
 
             put("enableVNC", true);
-
-            /* How to enable video recording */
-            put("enableVideo", true);
         }});
         WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
         setWebDriver(driver);
