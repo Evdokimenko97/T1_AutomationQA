@@ -57,7 +57,7 @@ public class TestUI_Task7 extends BaseTest {
     }
 
     @Test
-    @DisplayName("Тест с проверкой кролинга")
+    @DisplayName("Тест с проверкой скролинга")
     void infiniteScrollTest() {
         // Открытие страницы 'Infinite Scroll'
         $x(infiniteScroll).click();
