@@ -1,2 +1,8 @@
 /.idea/
 /ui-tests/target/
+/ui-tests/allure-results/
+/api-tests/.allure/
+/.allure/
+/ui-tests/.allure/
+/api-tests/.allure/
+/ui-tests/build/
