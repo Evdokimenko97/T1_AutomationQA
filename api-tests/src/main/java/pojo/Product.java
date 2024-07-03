@@ -3,6 +3,7 @@ package pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+
 @Data
 @AllArgsConstructor
 public class Product {
@@ -11,4 +12,8 @@ public class Product {
     private String category;
     private double price;
     private int discount;
+
+    public Product() {
+    }
 }
+
