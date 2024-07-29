@@ -1,10 +1,9 @@
-package core;
-
 import com.codeborne.selenide.*;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import core.BaseTest;
 
 import java.time.Duration;
 import java.util.ArrayList;

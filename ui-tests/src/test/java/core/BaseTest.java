@@ -5,9 +5,7 @@ import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.WebDriverRunner;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -21,7 +19,7 @@ import java.util.HashMap;
 
 import static com.codeborne.selenide.WebDriverRunner.setWebDriver;
 
-abstract class BaseTest {
+public abstract class BaseTest {
 
     /**
      * Добавляем конфигурации для браузера
@@ -40,20 +38,20 @@ abstract class BaseTest {
 //            Configuration.browserCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
 //        }
 
+        // Параметры Selenoid (Selenoid UI)
         ChromeOptions options = new ChromeOptions();
         options.setCapability("browserVersion", "latest");
         options.setCapability("selenoid:options", new HashMap<String, Object>() {{
-
-            /* How to set session timeout */
             put("sessionTimeout", "15m");
 
-            /* How to add "trash" button */
             put("labels", new HashMap<String, Object>() {{
                 put("manual", "true");
             }});
 
             put("enableVNC", true);
         }});
+
+        // Docker
         WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
         setWebDriver(driver);
 
@@ -73,7 +71,7 @@ abstract class BaseTest {
     }
 
     @BeforeEach
-    public void setUp() throws MalformedURLException {
+    protected void setUp() throws MalformedURLException {
         configurationBrowser();
         openBrowserWithURL();
     }
