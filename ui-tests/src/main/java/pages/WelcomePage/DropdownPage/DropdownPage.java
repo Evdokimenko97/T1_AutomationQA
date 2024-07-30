@@ -1,7 +1,7 @@
-package pages.DropdownPage;
+package pages.WelcomePage.DropdownPage;
 
 import io.qameta.allure.Step;
-import pages.WelcomePage;
+import pages.WelcomePage.WelcomePage;
 
 public class DropdownPage extends WelcomePage {
     private static final String dropdown = "//select[@id='dropdown']";
@@ -13,6 +13,11 @@ public class DropdownPage extends WelcomePage {
         clickDropdownPage();
     }
 
+    @Step("Получение заголовка страницы 'Dropdown'")
+    public String getPageTitle() {
+        return super.getPageTitle(pageTitle);
+    }
+
     @Step("Выбрать опцию '{option}' в комбо-боксе")
     public void selectOption(String option, int timeout) {
         elementActions.choiceValue(dropdown, option, false, timeout);
@@ -22,10 +27,5 @@ public class DropdownPage extends WelcomePage {
     public boolean isOptionSelected(String option, int timeout) {
         String optionLocator = String.format(optionTemplate, option);
         return elementActions.checkSelectedElement(optionLocator, true, false, timeout);
-    }
-
-    @Step("Получение заголовка страницы")
-    public String getPageTitle() {
-        return super.getPageTitle(pageTitle);
     }
 }

@@ -1,5 +1,5 @@
 import com.codeborne.selenide.Selenide;
-import core.BaseTest;
+import base.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.*;

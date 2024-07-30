@@ -1,18 +1,21 @@
-package pages.Checkboxes;
+package pages.WelcomePage.CheckboxesPage;
 
-import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
-import pages.BasePage;
-import pages.WelcomePage;
+import pages.WelcomePage.WelcomePage;
 
 public class CheckboxesPage extends WelcomePage {
+    private static final String pageTitle = "//h3";
     private static final String checkbox1 = "//form[@id='checkboxes']/input[1]";
     private static final String checkbox2 = "//form[@id='checkboxes']/input[2]";
-    private static final String pageTitle = "//h3";
 
     public CheckboxesPage() {
         super();
         clickCheckboxesPage();
+    }
+
+    @Step("Получение заголовка страницы 'Checkboxes'")
+    public String getPageTitle() {
+        return super.getPageTitle(pageTitle);
     }
 
     @Step("Выбор первого чек-бокса")
@@ -33,10 +36,5 @@ public class CheckboxesPage extends WelcomePage {
     @Step("Проверка второго чек-бокса")
     public boolean isSecondCheckboxSelected(boolean isSelected) {
         return elementActions.checkSelectedElement(checkbox2, isSelected, false);
-    }
-
-    @Step("Получение заголовка страницы")
-    public String getPageTitle() {
-        return super.getPageTitle(pageTitle);
     }
 }

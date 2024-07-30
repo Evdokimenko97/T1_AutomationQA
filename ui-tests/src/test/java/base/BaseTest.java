@@ -1,4 +1,4 @@
-package core;
+package base;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;

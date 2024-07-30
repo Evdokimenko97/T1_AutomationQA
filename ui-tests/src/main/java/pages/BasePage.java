@@ -10,6 +10,6 @@ public class BasePage {
     }
 
     public String getPageTitle(String pageTitleLocator) {
-        return elementActions.getTextFromField(pageTitleLocator, false);
+        return elementActions.getTextOrValueFromField(pageTitleLocator, false,false);
     }
 }

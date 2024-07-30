@@ -1,28 +1,24 @@
-import assertion.BasicAssertion;
-import com.codeborne.selenide.*;
-import io.qameta.allure.Step;
+import com.codeborne.selenide.CollectionCondition;
+import com.codeborne.selenide.ElementsCollection;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import core.BaseTest;
-import pages.Checkboxes.CheckboxesPage;
-import pages.DropdownPage.DropdownPage;
-import pages.WelcomePage;
+import base.BaseTest;
+import pages.WelcomePage.CheckboxesPage.CheckboxesPage;
+import pages.WelcomePage.DisappearingElements.DisappearingElementsPage;
+import pages.WelcomePage.DropdownPage.DropdownPage;
+import pages.WelcomePage.InputsPage.InputsPage;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestUI extends BaseTest {
 
 //    // Elements
-//    private static final String disappearingElements = "//div[@id='content']//ul/li";
 //    private static final String avatars = "//img[@alt='User Avatar']";
 //
 //    // Element
@@ -66,53 +62,49 @@ public class TestUI extends BaseTest {
         assertTrue(dropdownPage.isOptionSelected("Option 2", 5), "Выпадающее значение 'Option 2' не выбрана");
     }
 
-//
-//    @RepeatedTest(value = 5, failureThreshold = 1, name = "Тест с отображением 5 элементов #{currentRepetition} из {totalRepetitions}")
-//    void test3() {
-//        // Открытие страницы 'Dropdown'
-//        $x(disappearingElementsPage).click();
-//
-//        // Проверка 5 элементов
-//        ElementsCollection elements = $$x(disappearingElements);
-//        elements.should(CollectionCondition.size(5));
-//    }
-//
-//    @TestFactory
-//    @DisplayName("Тест с заполнением поля ввода")
-//    List<DynamicTest> test4() {
-//        List<DynamicTest> result = new ArrayList<>();
-//
-//        // Открытие страницы 'Inputs'
-//        $x(inputsPage).click();
-//
-//        // Позитивные тесты
-//        List<String> testData = Arrays.asList("0", "123", "456", "789", "987", "654", "321", "1000", "999", "9999");
-//        for (int i = 0; i < testData.size(); i++) {
-//            String number = testData.get(i);
-//            result.add(
-//                    DynamicTest.dynamicTest("Позитивный тест #" + i + ": ввод числа " + number,
-//                            () -> {
-//                                inputField(inputNumber, number);
-//                                $x(inputNumber).shouldHave(exactValue(number));
-//                            })
-//            );
-//        }
-//
-//        // Негативные тесты
-//        List<String> invalidInputs = Arrays.asList("abc", "!@#", " 123", "456 ");
-//        for (int i = 0; i < invalidInputs.size(); i++) {
-//            String invalidInput = invalidInputs.get(i);
-//            result.add(
-//                    DynamicTest.dynamicTest("Негативный тест #" + i + ": попытка ввода " + invalidInput,
-//                            () -> {
-//                                inputField(inputNumber, invalidInput);
-//                                $x(inputNumber).shouldNotHave(exactValue(invalidInput));
-//                            })
-//            );
-//        }
-//
-//        return result;
-//    }
+    @RepeatedTest(value = 5, failureThreshold = 1, name = "Тест с отображением 5 элементов #{currentRepetition} из {totalRepetitions}")
+    void testDisappearingElements() {
+        DisappearingElementsPage disappearingElements = new DisappearingElementsPage();
+        assertEquals("Disappearing Elements", disappearingElements.getPageTitle(), "Заголовок страницы не соответствует ожидаемому");
+
+        ElementsCollection elements = disappearingElements.getElements();
+        elements.should(CollectionCondition.size(5));
+    }
+
+    @TestFactory
+    @DisplayName("Тест с заполнением поля ввода")
+    List<DynamicTest> testInputField() {
+        List<DynamicTest> result = new ArrayList<>();
+
+        InputsPage inputsPage = new InputsPage();
+        assertEquals("Inputs", inputsPage.getPageTitle(), "Заголовок страницы не соответствует ожидаемому");
+
+        // Позитивные тесты
+        List<String> validInputs = Arrays.asList("0", "123", "456", "789", "987", "654", "321", "1000", "999", "9999");
+        List<DynamicTest> positiveTests = validInputs.stream()
+                .map(number -> DynamicTest.dynamicTest("Позитивный тест: ввод числа " + number,
+                        () -> {
+                            inputsPage.inputNumber(number);
+                            assertEquals(number, inputsPage.getInputValue(), "Значение в поле ввода не соответствует ожидаемому");
+                        }))
+                .collect(Collectors.toList());
+
+        // Негативные тесты
+        List<String> invalidInputs = Arrays.asList("abc", "!@#", " 123", "456 ");
+        List<DynamicTest> negativeTests = invalidInputs.stream()
+                .map(input -> DynamicTest.dynamicTest("Негативный тест: попытка ввода " + input,
+                        () -> {
+                            inputsPage.inputNumber(input);
+                            assertNotEquals(inputsPage.getInputValue(), input, "Значение в поле ввода не должно соответствовать некорректному вводу");
+                        }))
+                .collect(Collectors.toList());
+
+        result.addAll(positiveTests);
+        result.addAll(negativeTests);
+
+        return result;
+    }
+
 //
 //    // Ввод поля
 //    private void inputField(String xpath, String value) {

@@ -1,9 +1,10 @@
-package pages;
+package pages.WelcomePage;
 
 import io.qameta.allure.Step;
+import pages.BasePage;
 import utils.ElementActions;
 
-public class WelcomePage extends BasePage{
+public class WelcomePage extends BasePage {
     private static final String checkboxesPage = "//li/a[text()='Checkboxes']";
     private static final String dropdownPage = "//li/a[text()='Dropdown']";
     private static final String disappearingElementsPage = "//li/a[text()='Disappearing Elements']";

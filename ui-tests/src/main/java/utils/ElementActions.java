@@ -142,22 +142,24 @@ public class ElementActions {
     }
 
     /**
-     * Получение текста из поля с ожиданием
+     * Получение текста или значения из поля с ожиданием
      *
-     * @param locator    локатор элемента
-     * @param cssOrXPath true - Css локатор, false - XPath локатор
-     * @param timeout    - время ожидания
+     * @param locator     локатор элемента
+     * @param cssOrXPath  true - Css локатор, false - XPath локатор
+     * @param timeout     время ожидания
+     * @param checkValue  true - проверка значения, false - проверка текста
      */
-    public String getTextFromField(String locator, boolean cssOrXPath, int timeout) {
+    public String getTextOrValueFromField(String locator, boolean cssOrXPath, int timeout, boolean checkValue) {
         SelenideElement element = cssOrXPath ? $(locator) : $x(locator);
-        return element.shouldBe(Condition.visible, Duration.ofSeconds(timeout)).getText();
+        element.shouldBe(Condition.visible, Duration.ofSeconds(timeout));
+        return checkValue ? element.getValue() : element.getText();
     }
 
     /**
-     * Получение текста из поля
+     * Получение текста или значения из поля
      * См. описание выше
      */
-    public String getTextFromField(String locator, boolean cssOrXPath) {
-        return getTextFromField(locator, cssOrXPath, 0);
+    public String getTextOrValueFromField(String locator, boolean cssOrXPath, boolean checkValue) {
+        return getTextOrValueFromField(locator, cssOrXPath, 0, checkValue);
     }
 }
