@@ -2,15 +2,15 @@ package assertion;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
-import org.openqa.selenium.WebElement;
+import com.codeborne.selenide.SelenideElement;
 
-public class BasicAssertion extends AbstractAssert<BasicAssertion, WebElement> {
+public class BasicAssertion extends AbstractAssert<BasicAssertion, SelenideElement> {
 
-    private BasicAssertion(WebElement actual) {
-        super(actual, AbstractAssert.class);
+    private BasicAssertion(SelenideElement actual) {
+        super(actual, BasicAssertion.class);
     }
 
-    public static BasicAssertion assertThat(WebElement actual) {
+    public static BasicAssertion assertThat(SelenideElement actual) {
         return new BasicAssertion(actual);
     }
 
@@ -24,7 +24,7 @@ public class BasicAssertion extends AbstractAssert<BasicAssertion, WebElement> {
 
     public BasicAssertion valueIsEquals(String expectedValue) {
         Assertions.assertThat(actual.getAttribute("value"))
-                .as("Значение элемента не равен %s", expectedValue)
+                .as("Значение элемента не равно %s", expectedValue)
                 .isEqualToIgnoringCase(expectedValue);
 
         return this;
@@ -32,17 +32,16 @@ public class BasicAssertion extends AbstractAssert<BasicAssertion, WebElement> {
 
     public BasicAssertion valueIsNotEquals(String expectedValue) {
         Assertions.assertThat(actual.getAttribute("value"))
-                .as("Значение элемента не равен %s", expectedValue)
-                .isEqualToIgnoringCase(expectedValue);
+                .as("Значение элемента не должно быть %s", expectedValue)
+                .isNotEqualToIgnoringCase(expectedValue);
 
         return this;
     }
 
-
-    public BasicAssertion checkedIsEquals(String expectedChecked) {
-        Assertions.assertThat(actual.getAttribute("checked"))
-                .as("Значение 'checked' элемента не равен %s", expectedChecked)
-                .isEqualToIgnoringCase(expectedChecked);
+    public BasicAssertion checkedIsEquals(boolean isChecked) {
+        Assertions.assertThat(actual.isSelected())
+                .as("Чекбокс не в ожидаемом состоянии %s", isChecked)
+                .isEqualTo(isChecked);
 
         return this;
     }
