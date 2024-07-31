@@ -1,12 +1,12 @@
 import com.codeborne.selenide.CollectionCondition;
-import com.codeborne.selenide.ElementsCollection;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import base.BaseTest;
 import pages.WelcomePage.CheckboxesPage.CheckboxesPage;
-import pages.WelcomePage.DisappearingElements.DisappearingElementsPage;
+import pages.WelcomePage.DisappearingElementsPage.DisappearingElementsPage;
 import pages.WelcomePage.DropdownPage.DropdownPage;
+import pages.WelcomePage.HoverPage.HoverPage;
 import pages.WelcomePage.InputsPage.InputsPage;
 
 import java.util.ArrayList;
@@ -15,12 +15,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUI extends BaseTest {
 
-//    // Elements
-//    private static final String avatars = "//img[@alt='User Avatar']";
-//
 //    // Element
 //    private static final String notificationMsg = "//div[@class='flash notice']";
 //    private static final String messageContent = "//div[@id='content']//p";
@@ -55,11 +53,11 @@ public class TestUI extends BaseTest {
         DropdownPage dropdownPage = new DropdownPage();
         assertEquals("Dropdown List", dropdownPage.getPageTitle(), "Заголовок страницы не соответствует ожидаемому");
 
-        dropdownPage.selectOption("Option 1", 5);
-        assertTrue(dropdownPage.isOptionSelected("Option 1", 5), "Выпадающее значение 'Option 1' не выбрана");
+        dropdownPage.selectOption("Option 1");
+        assertTrue(dropdownPage.isOptionSelected("Option 1"), "Выпадающее значение 'Option 1' не выбрана");
 
-        dropdownPage.selectOption("Option 2", 5);
-        assertTrue(dropdownPage.isOptionSelected("Option 2", 5), "Выпадающее значение 'Option 2' не выбрана");
+        dropdownPage.selectOption("Option 2");
+        assertTrue(dropdownPage.isOptionSelected("Option 2"), "Выпадающее значение 'Option 2' не выбрана");
     }
 
     @RepeatedTest(value = 5, failureThreshold = 1, name = "Тест с отображением 5 элементов #{currentRepetition} из {totalRepetitions}")
@@ -67,8 +65,7 @@ public class TestUI extends BaseTest {
         DisappearingElementsPage disappearingElements = new DisappearingElementsPage();
         assertEquals("Disappearing Elements", disappearingElements.getPageTitle(), "Заголовок страницы не соответствует ожидаемому");
 
-        ElementsCollection elements = disappearingElements.getElements();
-        elements.should(CollectionCondition.size(5));
+        disappearingElements.getElements().should(CollectionCondition.size(5));
     }
 
     @TestFactory
@@ -105,28 +102,17 @@ public class TestUI extends BaseTest {
         return result;
     }
 
-//
-//    // Ввод поля
-//    private void inputField(String xpath, String value) {
-//        $x(xpath).clear();
-//        $x(xpath).sendKeys(value);
-//    }
-//
-//    @ParameterizedTest(name = "Тест с наведением мыши на элемент")
-//    @ValueSource(ints = {1, 2, 3})
-//    void test5(int avatarNum) {
-//        // Открытие страницы 'Hovers'
-//        $x(hoversPage).click();
-//
-//        // Наведение мыши на элемент
-//        String avatar = "(" + avatars + ")[" + avatarNum + "]";
-//        $x(avatar).hover();
-//
-//        // Проверка
-//        String expectedText = "user" + avatarNum;
-//        $x(avatar + "/parent::*/div[@class='figcaption']").shouldHave(text(expectedText));
-//    }
-//
+    @ParameterizedTest(name = "Тест с наведением мыши на элемент #{0}")
+    @ValueSource(ints = {1, 2, 3})
+    void testHoverElement(int avatarNum) {
+        HoverPage hoverPage = new HoverPage();
+        assertEquals("Hovers", hoverPage.getPageTitle(), "Заголовок страницы не соответствует ожидаемому");
+
+        hoverPage.hoverAvatar(avatarNum);
+        String expectedText = "user" + avatarNum;
+        Assertions.assertTrue(hoverPage.getTextAvatar(avatarNum).contains(expectedText), "Текст аватара некорректный");
+    }
+
 //    @RepeatedTest(value = 10, name = "Тест с проверкой сообщения #{currentRepetition} из {totalRepetitions}")
 //    void test6() {
 //        // Открытие страницы 'Notification Message'

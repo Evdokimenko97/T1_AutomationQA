@@ -1,4 +1,4 @@
-package pages.WelcomePage.DisappearingElements;
+package pages.WelcomePage.DisappearingElementsPage;
 
 import com.codeborne.selenide.ElementsCollection;
 import io.qameta.allure.Step;

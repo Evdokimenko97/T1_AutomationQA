@@ -4,7 +4,6 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 
 import java.time.Duration;
-import java.util.Objects;
 
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$x;
@@ -43,6 +42,7 @@ public class ElementActions {
         SelenideElement element = cssOrXPath ? $(locator) : $x(locator);
         element.shouldBe(Condition.visible, Duration.ofSeconds(timeout)).selectOption(value);
     }
+
     /**
      * Выбор значения из выпадающего списка
      * См. описание выше
@@ -52,27 +52,25 @@ public class ElementActions {
     }
 
     /**
-     * Проверка текста или значения поля с ожиданием
+     * Получение текста или значения из поля с ожиданием
      *
-     * @param locator    - локатор поля
-     * @param value      - значение поля
-     * @param contains   - параметр проверки части строки (true - по части строки, false - точное значение)
-     * @param cssOrXPath - true - Css локатор, false - XPath локатор
-     * @param checkValue - true - проверка значения, false - проверка текста
-     * @param timeout    - время ожидания
+     * @param locator     - локатор элемента
+     * @param cssOrXPath  - true - Css локатор, false - XPath локатор
+     * @param timeout     - время ожидания
+     * @param checkValue  - true - проверка значения, false - проверка текста
      */
-    public boolean validateField(String locator, String value, boolean contains, boolean cssOrXPath, boolean checkValue, int timeout) {
-        SelenideElement eField = cssOrXPath ? $(locator) : $x(locator);
-        String fieldText = checkValue ? eField.shouldBe(Condition.visible, Duration.ofSeconds(timeout)).getValue() : eField.shouldBe(Condition.visible, Duration.ofSeconds(timeout)).getText();
-        return contains ? Objects.requireNonNull(fieldText).contains(value) : Objects.equals(fieldText, value);
+    public String getTextOrValueFromField(String locator, boolean cssOrXPath, int timeout, boolean checkValue) {
+        SelenideElement element = cssOrXPath ? $(locator) : $x(locator);
+        element.shouldBe(Condition.visible, Duration.ofSeconds(timeout));
+        return checkValue ? element.getValue() : element.getText();
     }
 
     /**
-     * Проверка текста или значения поля
+     * Получение текста или значения из поля
      * См. описание выше
      */
-    public boolean validateField(String locator, String value, boolean contains, boolean cssOrXPath, boolean checkValue) {
-        return validateField(locator, value, contains, cssOrXPath, checkValue, 0);
+    public String getTextOrValueFromField(String locator, boolean cssOrXPath, boolean checkValue) {
+        return getTextOrValueFromField(locator, cssOrXPath, 0, checkValue);
     }
 
     /**
@@ -124,8 +122,8 @@ public class ElementActions {
     /**
      * Нажимаем на элемент с ожиданием
      *
-     * @param locator    локатор элемента
-     * @param cssOrXPath true - Css локатор, false - XPath локатор
+     * @param locator    - локатор элемента
+     * @param cssOrXPath - true - Css локатор, false - XPath локатор
      * @param timeout    - время ожидания
      */
     public void clickElement(String locator, boolean cssOrXPath, int timeout) {
@@ -142,24 +140,22 @@ public class ElementActions {
     }
 
     /**
-     * Получение текста или значения из поля с ожиданием
+     * Перемещаем курсор на элемент
      *
-     * @param locator     локатор элемента
-     * @param cssOrXPath  true - Css локатор, false - XPath локатор
-     * @param timeout     время ожидания
-     * @param checkValue  true - проверка значения, false - проверка текста
+     * @param locator    - локатор элемента
+     * @param cssOrXPath - true - Css локатор, false - XPath локатор
+     * @param timeout    - время ожидания
      */
-    public String getTextOrValueFromField(String locator, boolean cssOrXPath, int timeout, boolean checkValue) {
+    public void hoverElement(String locator, boolean cssOrXPath, int timeout) {
         SelenideElement element = cssOrXPath ? $(locator) : $x(locator);
-        element.shouldBe(Condition.visible, Duration.ofSeconds(timeout));
-        return checkValue ? element.getValue() : element.getText();
+        element.shouldBe(Condition.visible, Duration.ofSeconds(timeout)).hover();
     }
 
     /**
-     * Получение текста или значения из поля
+     * Перемещаем курсор на элемент
      * См. описание выше
      */
-    public String getTextOrValueFromField(String locator, boolean cssOrXPath, boolean checkValue) {
-        return getTextOrValueFromField(locator, cssOrXPath, 0, checkValue);
+    public void hoverElement(String locator, boolean cssOrXPath) {
+        hoverElement(locator, cssOrXPath, 0);
     }
 }
