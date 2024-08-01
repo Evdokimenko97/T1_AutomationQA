@@ -8,6 +8,7 @@ import pages.WelcomePage.DisappearingElementsPage.DisappearingElementsPage;
 import pages.WelcomePage.DropdownPage.DropdownPage;
 import pages.WelcomePage.HoverPage.HoverPage;
 import pages.WelcomePage.InputsPage.InputsPage;
+import pages.WelcomePage.NotificationMessagePage.NotificationMessagePage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestUI extends BaseTest {
 
 //    // Element
-//    private static final String notificationMsg = "//div[@class='flash notice']";
 //    private static final String messageContent = "//div[@id='content']//p";
 //
 //
@@ -28,7 +28,6 @@ public class TestUI extends BaseTest {
 //    private static final String inputNumber = "//input[@type='number']";
 //
 //    // Buttons
-//    private static final String clickButton = "//a[text()='Click here']";
 //    private static final String addElement = "//button[text()='Add Element']";
 //    private static final String buttonElements = "//div[@id='elements']/button";
 
@@ -113,17 +112,16 @@ public class TestUI extends BaseTest {
         Assertions.assertTrue(hoverPage.getTextAvatar(avatarNum).contains(expectedText), "Текст аватара некорректный");
     }
 
-//    @RepeatedTest(value = 10, name = "Тест с проверкой сообщения #{currentRepetition} из {totalRepetitions}")
-//    void test6() {
-//        // Открытие страницы 'Notification Message'
-//        $x(notificationMessagesPage).click();
-//
-//        // Нажатие на кн. 'Click here' и проверка
-//        $x(clickButton).click();
-//        $x(notificationMsg).shouldHave(text("Action successful"));
-//    }
-//
-//
+    @RepeatedTest(value = 5, name = "Тест с проверкой сообщения #{currentRepetition} из {totalRepetitions}")
+    void testCheckNotificationMessage() {
+        NotificationMessagePage notification = new NotificationMessagePage();
+        assertEquals("Notification Message", notification.getPageTitle(), "Заголовок страницы не соответствует ожидаемому");
+
+        notification.clickHereButton();
+        assertTrue(notification.getNotificationMessage().contains("Action successful"), "Сообщение '" + notification.getNotificationMessage() + "' вместо 'Action successful'");
+    }
+
+
 //    @TestFactory
 //    @DisplayName("Тест с добавлением и удалением элементов")
 //    List<DynamicTest> test7() {
