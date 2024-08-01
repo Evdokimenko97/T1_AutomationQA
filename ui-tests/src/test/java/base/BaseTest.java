@@ -57,12 +57,11 @@ public abstract class BaseTest {
             // Docker
             WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
             setWebDriver(driver);
-
-
-            SelenideLogger.addListener("AllureSelenide", new AllureSelenide()
-                    .screenshots(true)
-                    .savePageSource(true));
         }
+
+        SelenideLogger.addListener("AllureSelenide", new AllureSelenide()
+                .screenshots(true)
+                .savePageSource(true));
     }
 
     /**
