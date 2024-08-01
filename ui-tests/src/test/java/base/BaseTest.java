@@ -39,30 +39,29 @@ public abstract class BaseTest {
                 options.addArguments("--remote-allow-origins=*");
                 Configuration.browserCapabilities = new DesiredCapabilities();
                 Configuration.browserCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
+            }
+        } else if (ConfigReader.getProperty("setUp").equals("selenoid")) {
+            // Параметры Selenoid (Selenoid UI)
+            ChromeOptions options = new ChromeOptions();
+            options.setCapability("browserVersion", "latest");
+            options.setCapability("selenoid:options", new HashMap<String, Object>() {{
+                put("sessionTimeout", "15m");
 
-            } else if (ConfigReader.getProperty("setUp").equals("selenoid")) {
-                // Параметры Selenoid (Selenoid UI)
-                ChromeOptions options = new ChromeOptions();
-                options.setCapability("browserVersion", "latest");
-                options.setCapability("selenoid:options", new HashMap<String, Object>() {{
-                    put("sessionTimeout", "15m");
-
-                    put("labels", new HashMap<String, Object>() {{
-                        put("manual", "true");
-                    }});
-
-                    put("enableVNC", true);
+                put("labels", new HashMap<String, Object>() {{
+                    put("manual", "true");
                 }});
 
-                // Docker
-                WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
-                setWebDriver(driver);
+                put("enableVNC", true);
+            }});
+
+            // Docker
+            WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
+            setWebDriver(driver);
 
 
-                SelenideLogger.addListener("AllureSelenide", new AllureSelenide()
-                        .screenshots(true)
-                        .savePageSource(true));
-            }
+            SelenideLogger.addListener("AllureSelenide", new AllureSelenide()
+                    .screenshots(true)
+                    .savePageSource(true));
         }
     }
 
