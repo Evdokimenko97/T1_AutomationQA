@@ -4,18 +4,12 @@ import io.qameta.allure.Step;
 import pages.WelcomePage.WelcomePage;
 
 public class CheckboxesPage extends WelcomePage {
-    private static final String pageTitle = "//h3";
     private static final String checkbox1 = "//form[@id='checkboxes']/input[1]";
     private static final String checkbox2 = "//form[@id='checkboxes']/input[2]";
 
     public CheckboxesPage() {
         super();
         clickCheckboxesPage();
-    }
-
-    @Step("Получение заголовка страницы 'Checkboxes'")
-    public String getPageTitle() {
-        return super.getPageTitle(pageTitle);
     }
 
     @Step("Выбор первого чек-бокса")

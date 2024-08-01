@@ -4,17 +4,11 @@ import io.qameta.allure.Step;
 import pages.WelcomePage.WelcomePage;
 
 public class InputsPage extends WelcomePage {
-    private static final String pageTitle = "//h3";
     private static final String inputNumber = "//input[@type='number']";
 
     public InputsPage() {
         super();
         clickInputsPage();
-    }
-
-    @Step("Получение заголовка страницы 'Inputs'")
-    public String getPageTitle() {
-        return super.getPageTitle(pageTitle);
     }
 
     @Step("Ввод числа '{number}' в поле ввода")

@@ -4,7 +4,6 @@ import io.qameta.allure.Step;
 import pages.WelcomePage.WelcomePage;
 
 public class HoverPage extends WelcomePage {
-    private static final String pageTitle = "//h3";
     private static final String avatar = "(//img[@alt='User Avatar'])[%s]";
     private static final String avatarFigcaption = avatar + "/parent::*/div[@class='figcaption']";
 
@@ -13,10 +12,6 @@ public class HoverPage extends WelcomePage {
         clickHoversPage();
     }
 
-    @Step("Получить заголовок страницы 'HoverPage'")
-    public String getPageTitle() {
-        return super.getPageTitle(pageTitle);
-    }
 
     @Step("Навести мышь на автар '{nameNum}'")
     public void hoverAvatar(int nameNum) {

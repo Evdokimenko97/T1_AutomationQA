@@ -6,17 +6,12 @@ import pages.WelcomePage.WelcomePage;
 public class DropdownPage extends WelcomePage {
     private static final String dropdown = "//select[@id='dropdown']";
     private static final String optionTemplate = "//option[text()='%s']";
-    private static final String pageTitle = "//h3";
 
     public DropdownPage() {
         super();
         clickDropdownPage();
     }
 
-    @Step("Получение заголовка страницы 'Dropdown'")
-    public String getPageTitle() {
-        return super.getPageTitle(pageTitle);
-    }
 
     @Step("Выбрать опцию '{option}' в комбо-боксе")
     public void selectOption(String option) {
